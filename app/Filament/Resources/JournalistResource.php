@@ -10,6 +10,8 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ExportBulkAction;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -17,9 +19,26 @@ use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction as TablesExportBulkActi
 
 class JournalistResource extends Resource
 {
-    protected static ?string $model = Journalist::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $recordTitleAttribute = 'name';
+    protected static ?string $model = Journalist::class;
+    
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'contact', 'email'];
+    }
+
+    protected static int $globalSearchResultsLimit = 10;
+
+    protected static ?string $navigationLabel = 'Medios de Prensa';
+
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
     public static function form(Form $form): Form
     {
@@ -128,7 +147,21 @@ class JournalistResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('status')
+                ->label('Estado')
+                ->options([
+                0 => 'Activos',
+                1 => 'Baja',
+                ]),
+                SelectFilter::make('type')
+                ->label('Tipo')
+                ->options([
+                'Prensa' => 'Prensa',
+                'Radio' => 'Radio',
+                'Televisión' => 'Televisión',
+                'Digital' => 'Digital',
+                'Agencia' => 'Agencia'
+                ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
