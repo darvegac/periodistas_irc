@@ -5,16 +5,23 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\JournalistResource\Pages;
 use App\Filament\Resources\JournalistResource\RelationManagers;
 use App\Models\Journalist;
+use Filament\Actions\ActionGroup;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
+use Filament\Tables\Actions\ActionGroup as ActionsActionGroup;
 use Filament\Tables\Actions\ExportBulkAction;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpSpreadsheet\Reader\Xml\Style\Font;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction as TablesExportBulkAction;
 
 class JournalistResource extends Resource
@@ -81,6 +88,18 @@ class JournalistResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('status')
+                ->label('Estado')
+                ->badge()
+                   ->formatStateUsing(fn ($state) => match ($state) {
+                       0 => 'Activo',
+                       1 => 'Baja'
+
+                   })
+                   ->color(fn ($record) => match ($record->status) {
+                       0 => 'success',
+                       1 => 'danger',
+                   }),
                 Tables\Columns\TextColumn::make('folder')
                     ->label('Carpeta')
                     ->toggleable(isToggledHiddenByDefault: true)
@@ -102,9 +121,13 @@ class JournalistResource extends Resource
                     ->label('Ámbito Geográfico')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('category')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->label('Categoría')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('name')
+                    ->weight(FontWeight::Bold)
+                    ->limit(20)
+                    ->color('primary')
                     ->label('Medio')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('contact')
@@ -112,28 +135,23 @@ class JournalistResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('position')
                     ->label('Cargo')
+                    ->limit(20)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Teléfono')
+                    ->icon('heroicon-o-phone')
+                    ->iconColor('primary')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('type')
                     ->label('Tipo')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
+                    ->copyable()
+                    ->copyMessage('Email copiado')
+                    ->icon('heroicon-o-clipboard-document')
+                    ->iconColor('gray')
                     ->label('Email')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('status')
-                ->label('Estado')
-                ->badge()
-                   ->formatStateUsing(fn ($state) => match ($state) {
-                       0 => 'Activo',
-                       1 => 'Baja'
-
-                   })
-                   ->color(fn ($record) => match ($record->status) {
-                       0 => 'success',
-                       1 => 'danger',
-                   }),
                 Tables\Columns\TextColumn::make('notes')
                     ->label('Notas')
                     ->searchable(),
@@ -146,6 +164,7 @@ class JournalistResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->searchPlaceholder('Buscar medios...')
             ->filters([
                 SelectFilter::make('status')
                 ->label('Estado')
@@ -164,21 +183,42 @@ class JournalistResource extends Resource
                 ]),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\DeleteAction::make(),
-                Tables\Actions\ReplicateAction::make()
-                ->label('Duplicar'),
-                Tables\Actions\Action::make('toglleStatus')
-                ->label('Cambiar estado')
-                ->icon('heroicon-o-arrow-path')
-                ->color('gray')
-                ->action(fn ($record) => $record->update(['status' => $record->status ? 0 : 1]))
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\EditAction::make()
+                    ->color('primary')
+                    ->label('Editar'),
+                    Tables\Actions\ViewAction::make()
+                    ->label('Ver'),
+                    Tables\Actions\DeleteAction::make()
+                    ->label('Eliminar'),
+                    Tables\Actions\ReplicateAction::make()
+                    ->beforeReplicaSaved(function ($replica) {
+                        
+                        $replica->name = $replica->name . ' - DUPLICADO';
+                        $replica->user_id = Auth::id(); // Asigna el usuario actual
+                    })
+                    ->successNotification(
+                        Notification::make()
+                        ->success()
+                        ->title('Medio duplicado')
+                        ->body('El medio ha sido duplicado correctamente')
+                    )
+                    ->label('Duplicar')
+                    ->color('info'),
+                    Tables\Actions\Action::make('toglleStatus')
+                    ->label('Cambiar estado')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('success')
+                    ->action(fn ($record) => $record->update(['status' => $record->status ? 0 : 1]))
+                ])
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                    ->label('Eliminar seleccionados'),
                     TablesExportBulkAction::make()
+                    ->label('Exportar seleccionados')
 
                 ]),
             ]);
