@@ -29,7 +29,7 @@ class JournalistResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
     protected static ?string $model = Journalist::class;
-    
+
 
     public static function getNavigationBadge(): ?string
     {
@@ -51,55 +51,144 @@ class JournalistResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('folder')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('file')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('sheet')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('ccaa')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('geographical_scope')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('category')
-                    ->maxLength(255),
+                // Forms\Components\TextInput::make('folder')
+                //     ->maxLength(255),
+                // Forms\Components\TextInput::make('file')
+                //     ->maxLength(255),
+                // Forms\Components\TextInput::make('sheet')
+                //     ->maxLength(255),
+                // Forms\Components\TextInput::make('ccaa')
+                //     ->maxLength(255),
                 Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
+                    ->placeholder('Nombre del medio de prensa')
+                    ->label('Medio')
+                    ->required(),
                 Forms\Components\TextInput::make('contact')
-                    ->maxLength(255),
+                    ->label('Contacto'),
                 Forms\Components\TextInput::make('position')
-                    ->maxLength(255),
+                    ->label('Cargo'),
                 Forms\Components\TextInput::make('phone')
-                    ->tel()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('type')
-                    ->maxLength(255),
+                    ->label('Teléfono')
+                    ->tel(),
                 Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('notes')
-                    ->maxLength(255),
+                    ->label('Email')
+                    ->email(),
+                Forms\Components\Select::make('geographical_scope')
+                    ->options([
+                        'Local' => 'Local',
+                        'Provincial' => 'Provincial',
+                        'Autonómico' => 'Autonómico',
+                        'Nacional' => 'Nacional',
+                        'Internacional' => 'Internacional',
+                    ])
+                    ->label('Ámbito Geográfico'),
+                Forms\Components\Select::make('category')
+                        ->placeholder('Selecciona una categoría')
+                    ->searchable()
+                    ->options([
+                        'Tercera edad' => 'Tercera edad',
+                        'Energía' => 'Energía',
+                        'Construcción' => 'Construcción',
+                        'Construcción y Turismo' => 'Construcción y Turismo',
+                        'Turismo' => 'Turismo',
+                        'RSC' => 'RSC',
+                        'Generalistas' => 'Generalistas',
+                        'Formación' => 'Formación',
+                        'Mujeres' => 'Mujeres',
+                        'Discapacidad' => 'Discapacidad',
+                        'Mascotas' => 'Mascotas',
+                        'Economía' => 'Economía',
+                        'Comunicación' => 'Comunicación',
+                        'Salud' => 'Salud',
+                        'Revistas marca personal' => 'Revistas marca personal',
+                        'Revistas viajes y ocio' => 'Revistas viajes y ocio',
+                        'Revistas Moda y  Lifestyle' => 'Revistas Moda y  Lifestyle',
+                        'Revistas Masculinas' => 'Revistas Masculinas',
+                        'Grupo Prensa Ibérica' => 'Grupo Prensa Ibérica',
+                        'Grupo Publicación Heres' => 'Grupo Publicación Heres',
+                        'Grupo Hola' => 'Grupo Hola',
+                        'Grupo ZinetMedia Group' => 'Grupo ZinetMedia Group',
+                        'Grupo Condenast' => 'Grupo Condenast',
+                        'Grupo Mediaset y G+ J' => 'Grupo Mediaset y G+ J',
+                        'Grupo Zeta' => 'Grupo Zeta',
+                        'Grupo RBA' => 'Grupo RBA',
+                        'Grupo Hearst' => 'Grupo Hearst',
+                        'Agencias' => 'Agencias',
+                        'Revistas Femeninas' => 'Revistas Femeninas',
+                        'Grupo Unidad Editorial' => 'Grupo Unidad Editorial',
+                        'Grupo Godó' => 'Grupo Godó',
+                        'Grupo Prisa' => 'Grupo Prisa',
+                        'Suplementos Medios Generalistas' => 'Suplementos Medios Generalistas',
+                        'Ciencia' => 'Ciencia',
+                        'Música' => 'Música',
+                        'Teatro' => 'Teatro',
+                        'Maternidad' => 'Maternidad',
+                        'Cultura' => 'Cultura',
+                        'Poesía, Arte y Pensamiento' => 'Poesía, Arte y Pensamiento',
+                        'Literatura' => 'Literatura',
+                        'Pensamiento y Cultura' => 'Pensamiento y Cultura',
+                        'Política y Cultura' => 'Política y Cultura',
+                        'Biografías' => 'Biografías',
+                        'CCSS' => 'CCSS',
+                        'Arquitectura' => 'Arquitectura',
+                        'Medioambiente / Política' => 'Medioambiente / Política',
+                        'Política' => 'Política',
+                        'Cine' => 'Cine',
+                        'Arte' => 'Arte',
+                        'Educación' => 'Educación',
+                        'Historia' => 'Historia',
+                        'Cultura y CCSS' => 'Cultura y CCSS',
+                        'Feminismo' => 'Feminismo',
+                        'Revista' => 'Revista',
+                        'Periódico' => 'Periódico',
+                        'Televisión' => 'Televisión',
+                        'Radio' => 'Radio',
+                        'Web' => 'Web',
+                        'Freelance' => 'Freelance',
+                        'Noticias' => 'Noticias',
+                        'Programa' => 'Programa',
+                    ])
+                    ->label('Categoría'),
+                Forms\Components\Select::make('type')
+                        ->placeholder('Seleccione un tipo')
+                    ->searchable()
+                    ->options([
+                        'Generalista' => 'Generalista',
+                        'Televisión' => 'Televisión',
+                        'Especializado' => 'Especializado',
+                        'Agencia' => 'Agencia',
+                        'Radio' => 'Radio',
+                        'Económico' => 'Económico',
+                        'Prensa' => 'Prensa',
+                        'Digital' => 'Digital',
+                        'Freelance' => 'Freelance',
+                        'Asociación' => 'Asociación',
+                        'Suplemento' => 'Suplemento',
+                    ])
+                    ->label('Tipo'),
+                Forms\Components\Textarea::make('notes')
+                    ->label('Notas')
+                    ->maxLength(255)
+                    ->autosize()
             ]);
     }
 
-    
+
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('status')
-                ->label('Estado')
-                ->badge()
-                   ->formatStateUsing(fn ($state) => match ($state) {
-                       0 => 'Activo',
-                       1 => 'Baja'
-
-                   })
-                   ->color(fn ($record) => match ($record->status) {
-                       0 => 'success',
-                       1 => 'danger',
-                   }),
+                    ->label('Estado')
+                    ->badge()
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        0 => 'Activo',
+                        1 => 'Baja'
+                    })
+                    ->color(fn($record) => match ($record->status) {
+                        0 => 'success',
+                        1 => 'danger',
+                    }),
                 Tables\Columns\TextColumn::make('folder')
                     ->label('Carpeta')
                     ->toggleable(isToggledHiddenByDefault: true)
@@ -167,58 +256,64 @@ class JournalistResource extends Resource
             ->searchPlaceholder('Buscar medios...')
             ->filters([
                 SelectFilter::make('status')
-                ->label('Estado')
-                ->options([
-                0 => 'Activos',
-                1 => 'Baja',
-                ]),
+                    ->label('Estado')
+                    ->options([
+                        0 => 'Activos',
+                        1 => 'Baja',
+                    ]),
                 SelectFilter::make('type')
-                ->label('Tipo')
-                ->options([
-                'Prensa' => 'Prensa',
-                'Radio' => 'Radio',
-                'Televisión' => 'Televisión',
-                'Digital' => 'Digital',
-                'Agencia' => 'Agencia'
-                ]),
+                    ->label('Tipo')
+                    ->options([
+                        'Generalista' => 'Generalista',
+                        'Televisión' => 'Televisión',
+                        'Especializado' => 'Especializado',
+                        'Agencia' => 'Agencia',
+                        'Radio' => 'Radio',
+                        'Económico' => 'Económico',
+                        'Prensa' => 'Prensa',
+                        'Digital' => 'Digital',
+                        'Freelance' => 'Freelance',
+                        'Asociación' => 'Asociación',
+                        'Suplemento' => 'Suplemento',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\EditAction::make()
-                    ->color('primary')
-                    ->label('Editar'),
+                        ->color('primary')
+                        ->label('Editar'),
                     Tables\Actions\ViewAction::make()
-                    ->label('Ver'),
+                        ->label('Ver'),
                     Tables\Actions\DeleteAction::make()
-                    ->label('Eliminar'),
+                        ->label('Eliminar'),
                     Tables\Actions\ReplicateAction::make()
-                    ->beforeReplicaSaved(function ($replica) {
-                        
-                        $replica->name = $replica->name . ' - DUPLICADO';
-                        $replica->user_id = Auth::id(); // Asigna el usuario actual
-                    })
-                    ->successNotification(
-                        Notification::make()
-                        ->success()
-                        ->title('Medio duplicado')
-                        ->body('El medio ha sido duplicado correctamente')
-                    )
-                    ->label('Duplicar')
-                    ->color('info'),
+                        ->beforeReplicaSaved(function ($replica) {
+
+                            $replica->name = $replica->name . ' - DUPLICADO';
+                            $replica->user_id = Auth::id(); // Asigna el usuario actual
+                        })
+                        ->successNotification(
+                            Notification::make()
+                                ->success()
+                                ->title('Medio duplicado')
+                                ->body('El medio ha sido duplicado correctamente')
+                        )
+                        ->label('Duplicar')
+                        ->color('info'),
                     Tables\Actions\Action::make('toglleStatus')
-                    ->label('Cambiar estado')
-                    ->icon('heroicon-o-arrow-path')
-                    ->color('success')
-                    ->action(fn ($record) => $record->update(['status' => $record->status ? 0 : 1]))
+                        ->label('Cambiar estado')
+                        ->icon('heroicon-o-arrow-path')
+                        ->color('success')
+                        ->action(fn($record) => $record->update(['status' => $record->status ? 0 : 1]))
                 ])
 
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
-                    ->label('Eliminar seleccionados'),
+                        ->label('Eliminar seleccionados'),
                     TablesExportBulkAction::make()
-                    ->label('Exportar seleccionados')
+                        ->label('Exportar seleccionados')
 
                 ]),
             ]);

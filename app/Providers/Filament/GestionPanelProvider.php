@@ -35,8 +35,7 @@ class GestionPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Gestion/Widgets'), for: 'App\\Filament\\Gestion\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                Widgets\AccountWidget::class
             ])
             ->middleware([
                 EncryptCookies::class,
