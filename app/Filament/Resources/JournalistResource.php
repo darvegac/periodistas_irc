@@ -23,11 +23,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\Reader\Xml\Style\Font;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction as TablesExportBulkAction;
+use Illuminate\Contracts\Support\Htmlable;
+
 
 class JournalistResource extends Resource
 {
 
-    protected static ?string $recordTitleAttribute = 'name';
+    // protected static ?string $recordTitleAttribute = 'name';
+    
     protected static ?string $model = Journalist::class;
 
 
@@ -38,14 +41,20 @@ class JournalistResource extends Resource
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['name', 'contact', 'email'];
+        return ['name', 'contact', 'email','category.name'];
     }
+
 
     protected static int $globalSearchResultsLimit = 10;
 
     protected static ?string $navigationLabel = 'Medios de Prensa';
+    protected static ?string $pluralLabel = 'Medios de Prensa';
+    protected static ?string $modelLabel = 'Medios de Prensa';
+
+
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
+
 
     public static function form(Form $form): Form
     {
@@ -65,8 +74,18 @@ class JournalistResource extends Resource
                     ->required(),
                 Forms\Components\TextInput::make('contact')
                     ->label('Contacto'),
-                Forms\Components\TextInput::make('position')
-                    ->label('Cargo'),
+                Forms\Components\Select::make('position')
+                    ->label('Cargo')
+                    ->relationship('position', 'position')
+                    ->searchable()
+                    ->preload()
+                    ->createOptionForm([
+                        Forms\Components\TextInput::make('position')
+                            ->label('Cargo')
+                            ->required(),
+                        Forms\Components\TextArea::make('description')
+                            ->label('Descripción')
+                    ]),
                 Forms\Components\TextInput::make('phone')
                     ->label('Teléfono')
                     ->tel(),
@@ -84,88 +103,29 @@ class JournalistResource extends Resource
                     ->label('Ámbito Geográfico'),
                 Forms\Components\Select::make('category')
                         ->placeholder('Selecciona una categoría')
-                    ->searchable()
-                    ->options([
-                        'Tercera edad' => 'Tercera edad',
-                        'Energía' => 'Energía',
-                        'Construcción' => 'Construcción',
-                        'Construcción y Turismo' => 'Construcción y Turismo',
-                        'Turismo' => 'Turismo',
-                        'RSC' => 'RSC',
-                        'Generalistas' => 'Generalistas',
-                        'Formación' => 'Formación',
-                        'Mujeres' => 'Mujeres',
-                        'Discapacidad' => 'Discapacidad',
-                        'Mascotas' => 'Mascotas',
-                        'Economía' => 'Economía',
-                        'Comunicación' => 'Comunicación',
-                        'Salud' => 'Salud',
-                        'Revistas marca personal' => 'Revistas marca personal',
-                        'Revistas viajes y ocio' => 'Revistas viajes y ocio',
-                        'Revistas Moda y  Lifestyle' => 'Revistas Moda y  Lifestyle',
-                        'Revistas Masculinas' => 'Revistas Masculinas',
-                        'Grupo Prensa Ibérica' => 'Grupo Prensa Ibérica',
-                        'Grupo Publicación Heres' => 'Grupo Publicación Heres',
-                        'Grupo Hola' => 'Grupo Hola',
-                        'Grupo ZinetMedia Group' => 'Grupo ZinetMedia Group',
-                        'Grupo Condenast' => 'Grupo Condenast',
-                        'Grupo Mediaset y G+ J' => 'Grupo Mediaset y G+ J',
-                        'Grupo Zeta' => 'Grupo Zeta',
-                        'Grupo RBA' => 'Grupo RBA',
-                        'Grupo Hearst' => 'Grupo Hearst',
-                        'Agencias' => 'Agencias',
-                        'Revistas Femeninas' => 'Revistas Femeninas',
-                        'Grupo Unidad Editorial' => 'Grupo Unidad Editorial',
-                        'Grupo Godó' => 'Grupo Godó',
-                        'Grupo Prisa' => 'Grupo Prisa',
-                        'Suplementos Medios Generalistas' => 'Suplementos Medios Generalistas',
-                        'Ciencia' => 'Ciencia',
-                        'Música' => 'Música',
-                        'Teatro' => 'Teatro',
-                        'Maternidad' => 'Maternidad',
-                        'Cultura' => 'Cultura',
-                        'Poesía, Arte y Pensamiento' => 'Poesía, Arte y Pensamiento',
-                        'Literatura' => 'Literatura',
-                        'Pensamiento y Cultura' => 'Pensamiento y Cultura',
-                        'Política y Cultura' => 'Política y Cultura',
-                        'Biografías' => 'Biografías',
-                        'CCSS' => 'CCSS',
-                        'Arquitectura' => 'Arquitectura',
-                        'Medioambiente / Política' => 'Medioambiente / Política',
-                        'Política' => 'Política',
-                        'Cine' => 'Cine',
-                        'Arte' => 'Arte',
-                        'Educación' => 'Educación',
-                        'Historia' => 'Historia',
-                        'Cultura y CCSS' => 'Cultura y CCSS',
-                        'Feminismo' => 'Feminismo',
-                        'Revista' => 'Revista',
-                        'Periódico' => 'Periódico',
-                        'Televisión' => 'Televisión',
-                        'Radio' => 'Radio',
-                        'Web' => 'Web',
-                        'Freelance' => 'Freelance',
-                        'Noticias' => 'Noticias',
-                        'Programa' => 'Programa',
-                    ])
-                    ->label('Categoría'),
+                        ->relationship('category', 'name')
+                        ->label('Categoría')
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm([
+                            Forms\Components\TextInput::make('name')
+                                ->label('Categoría')
+                                ->required(),
+                            Forms\Components\TextArea::make('description')
+                                ->label('Descripción')
+                        ]),
                 Forms\Components\Select::make('type')
                         ->placeholder('Seleccione un tipo')
-                    ->searchable()
-                    ->options([
-                        'Generalista' => 'Generalista',
-                        'Televisión' => 'Televisión',
-                        'Especializado' => 'Especializado',
-                        'Agencia' => 'Agencia',
-                        'Radio' => 'Radio',
-                        'Económico' => 'Económico',
-                        'Prensa' => 'Prensa',
-                        'Digital' => 'Digital',
-                        'Freelance' => 'Freelance',
-                        'Asociación' => 'Asociación',
-                        'Suplemento' => 'Suplemento',
-                    ])
-                    ->label('Tipo'),
+                        ->relationship('type', 'name')
+                        ->label('Tipo')
+                        ->searchable()
+                        ->createOptionForm([
+                            Forms\Components\TextInput::make('name')
+                                ->label('Tipo')
+                                ->required(),
+                            Forms\Components\TextArea::make('description')
+                                ->label('Descripción')
+                        ]),
                 Forms\Components\Textarea::make('notes')
                     ->label('Notas')
                     ->maxLength(255)
@@ -209,7 +169,7 @@ class JournalistResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->label('Ámbito Geográfico')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('category')
+                Tables\Columns\TextColumn::make('category.name')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->label('Categoría')
                     ->searchable(),
@@ -222,7 +182,7 @@ class JournalistResource extends Resource
                 Tables\Columns\TextColumn::make('contact')
                     ->label('Contacto')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('position')
+                Tables\Columns\TextColumn::make('position.position')
                     ->label('Cargo')
                     ->limit(20)
                     ->searchable(),
@@ -231,7 +191,7 @@ class JournalistResource extends Resource
                     ->icon('heroicon-o-phone')
                     ->iconColor('primary')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('type')
+                Tables\Columns\TextColumn::make('type.name')
                     ->label('Tipo')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
@@ -243,6 +203,7 @@ class JournalistResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('notes')
                     ->label('Notas')
+                    ->limit(20)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -263,19 +224,15 @@ class JournalistResource extends Resource
                     ]),
                 SelectFilter::make('type')
                     ->label('Tipo')
-                    ->options([
-                        'Generalista' => 'Generalista',
-                        'Televisión' => 'Televisión',
-                        'Especializado' => 'Especializado',
-                        'Agencia' => 'Agencia',
-                        'Radio' => 'Radio',
-                        'Económico' => 'Económico',
-                        'Prensa' => 'Prensa',
-                        'Digital' => 'Digital',
-                        'Freelance' => 'Freelance',
-                        'Asociación' => 'Asociación',
-                        'Suplemento' => 'Suplemento',
-                    ]),
+                    ->relationship('type', 'name'),
+                SelectFilter::make('category')
+                    ->label('Categoría')
+                    ->relationship('category', 'name'),
+                SelectFilter::make('position')
+                    ->label('Cargo')
+                    ->searchable()
+                    ->preload()
+                    ->relationship('position', 'position'),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
