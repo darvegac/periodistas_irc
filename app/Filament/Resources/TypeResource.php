@@ -28,7 +28,7 @@ class TypeResource extends Resource
     protected static ?string $pluralLabel = 'Tipos de Medios';
     protected static ?string $modelLabel = 'Tipos de Medios';
 
-    protected static ?string $navigationGroup = 'Settings';
+    protected static ?string $navigationGroup = 'Opciones';
 
 
     public static function form(Form $form): Form

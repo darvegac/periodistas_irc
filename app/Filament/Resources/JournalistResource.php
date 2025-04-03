@@ -64,10 +64,8 @@ class JournalistResource extends Resource
                 //     ->maxLength(255),
                 // Forms\Components\TextInput::make('file')
                 //     ->maxLength(255),
-                // Forms\Components\TextInput::make('sheet')
-                //     ->maxLength(255),
-                // Forms\Components\TextInput::make('ccaa')
-                //     ->maxLength(255),
+                Forms\Components\TextInput::make('sheet'),
+                Forms\Components\TextInput::make('ccaa'),
                 Forms\Components\TextInput::make('name')
                     ->placeholder('Nombre del medio de prensa')
                     ->label('Medio')
@@ -119,6 +117,7 @@ class JournalistResource extends Resource
                         ->relationship('type', 'name')
                         ->label('Tipo')
                         ->searchable()
+                        ->preload()
                         ->createOptionForm([
                             Forms\Components\TextInput::make('name')
                                 ->label('Tipo')
